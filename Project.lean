@@ -44,23 +44,25 @@ instance [Zero (Fin 4)]: TopologicalSpace (Fourthcover) :=
 
 open scoped Manifold
 
-#check {(x,y) | x ≠ 0}
-/- Construction of the chart -/ 
+
+/- Construction of the chart -/
 variable (x y z : ℝ )
-def Euclideanwithoutplane0 : Type :=  
+
+def Euclideanwithoutplane0 : Type :=  {(x,y,z): ℝ × ℝ × ℝ | x ≠ 0 }
 def Euclideanwithoutplane1  [Zero (Fin 3)] : Type :=
   { x : EuclideanSpace ℝ (Fin 3) // 0 ≠  x 1  }
 def Euclideanwithoutplane2  [Zero (Fin 3)] : Type :=
   { x : EuclideanSpace ℝ (Fin 3) // 0 ≠  x 2  }
 
-instance [Zero (Fin 2)]: TopologicalSpace (Euclideanwithoutplane0) :=
+instance : TopologicalSpace (Euclideanwithoutplane0) :=
   instTopologicalSpaceSubtype
+
 instance [Zero (Fin 3)]: TopologicalSpace (Euclideanwithoutplane1) :=
   instTopologicalSpaceSubtype
 instance [Zero (Fin 3)]: TopologicalSpace (Euclideanwithoutplane2) :=
   instTopologicalSpaceSubtype
 
-def f (x: Firstcover) : Euclideanwithoutplane0 := sorry
+def f (x: Firstcover) : Euclideanwithoutplane0 := by
 def Firstchart : LocalHomeomorph (Firstcover) (Euclideanwithoutplane0) where
   toFun x := sorry
   invFun := sorry
