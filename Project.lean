@@ -1,13 +1,16 @@
 import Project.Basic
 import Mathlib.Topology.Instances.Real
-import Mathlib.Topology.LocalHomeomorph
+
 import Mathlib.Init.Align
 import Mathlib.Geometry.Manifold.LocalInvariantProperties
 import Mathlib.Geometry.Manifold.SmoothManifoldWithCorners
 import Mathlib.Analysis.InnerProductSpace.PiL2
-import Mathlib.Logic.Equiv.LocalEquiv
 import Mathlib.Topology.Sets.Opens
 import Mathlib.Tactic
+import Mathlib.Data.Set.Basic
+import Mathlib.Data.Real.Basic
+
+#check { (x, y, z) : ℝ × ℝ × ℝ | x + y + z ≠ 0}
 def hello_world := hello ++ " world"
 
 universe u
