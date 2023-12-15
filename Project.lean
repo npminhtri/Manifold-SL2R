@@ -17,9 +17,11 @@ universe u
 open TopologicalSpace
 noncomputable section
 
+/-The format of  this file based on the Real.lean file (instance the the manifold of ℝ\^n )-/
+
 /- Definition of SL(2,ℝ ) and charts by hand -/
 def SL2R : Type :=
-   { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*z-y*t =1 }
+   { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z =1 }
 
 
 /- Definition of four charts that covers SL(2,ℝ )-/
@@ -71,7 +73,6 @@ instance : TopologicalSpace (Euclideanwithoutplane2) :=
 
 
 
-
 /- Define the homeomorphism between each cover and a subet set in ℝ³. Here phij denotes the map of i-th cover
 ### The map of 1st cover
 -/
@@ -88,28 +89,29 @@ theorem nonzerofst (a: ℝ × ℝ × ℝ × ℝ )(ha: a.1 ≠ 0) : prodfst a ∈
 /- If the first coordiate is nonzero, we can go back to the First cover -/
 @[simp]
 theorem nonzerofst1 (a: ℝ × ℝ × ℝ   )(ha: a.1 ≠ 0) :
-inversefst a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ x ≠ 0 }:= by
+inversefst a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 }:= by
   simp;
-  apply And.intro
-  .field_simp; ring
-  .exact ha
+  field_simp; ring_nf
 
-theorem equivsl2 (x: ℝ × ℝ × ℝ × ℝ)(hx: x.1 ≠ 0 ∧ x.1 * x.2.2.2 - x.2.1*x.2.2.1=1):
-  x.2.2.2 = (x.2.1*x.2.2.1+1)/x.1 :=sorry
 
-def phi1 : PartialHomeomorph (Firstcover) (Euclideanwithoutplane0) where
+
+
+
+def phi1 (x: ℝ × ℝ × ℝ )(hx: x.1 ≠ 0): PartialHomeomorph (SL2R) (ℝ × ℝ × ℝ ) where
   toFun a := by
     constructor
-    . apply nonzerofst; exact a.2.2
-  invFun a := by
+    . exact a.1.1
+    . refine (a.1.2.1, a.1.2.1)
+  invFun  := by
+    intro a
     constructor
-    apply nonzerofst1; exact a.2
+    . apply nonzerofst1 x; exact hx
   source := by exact Set.univ
   target := by exact Set.univ
   map_source' := by simp
   map_target' := by simp
   left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by simp
+  right_inv' := by sorry
   open_source := by simp
   open_target := by simp
   continuousOn_toFun := by simp; sorry
