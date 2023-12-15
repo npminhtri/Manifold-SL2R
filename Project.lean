@@ -95,23 +95,17 @@ inversefst a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 }:= by
 
 
 
+variable (a:SL2R)
 
-
-def phi1 (x: ℝ × ℝ × ℝ )(hx: x.1 ≠ 0): PartialHomeomorph (SL2R) (ℝ × ℝ × ℝ ) where
-  toFun a := by
-    constructor
-    . exact a.1.1
-    . refine (a.1.2.1, a.1.2.1)
-  invFun  := by
-    intro a
-    constructor
-    . apply nonzerofst1 x; exact hx
+def phi1: PartialHomeomorph (SL2R) (ℝ × ℝ × ℝ ) where
+  toFun  := by exact fun a => (a.1.1, a.1.2.1, a.1.2.2.1)
+  invFun  x := by sorry
   source := by exact Set.univ
   target := by exact Set.univ
   map_source' := by simp
   map_target' := by simp
   left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by sorry
+  right_inv' := by simp; sorry
   open_source := by simp
   open_target := by simp
   continuousOn_toFun := by simp; sorry
@@ -245,13 +239,13 @@ def phi4 : PartialHomeomorph (Fourthcover) (Euclideanwithoutplane2) where
 ### Charted space structure on the SL(2,ℝ )
 
 In this section we construct a charted space structure on the SL(2,ℝ ) in a finite-dimensional
-real space `E`; that is, we show that it is locally homeomorphic to the Euclidean
+real space `ℝ × ℝ × \R  `; that is, we show that it is locally homeomorphic to the Euclidean
 space of dimension one less than `E`.
 -/
 section ChartedSpace
 
 instance chartedSpace  :
-    ChartedSpace (EuclideanSpace ℝ (Fin 4)) (Special_lineargroup_order_2) where
+    ChartedSpace (SL2R) (ℝ × ℝ × ℝ ) where
   atlas := sorry
   chartAt v := sorry
   mem_chart_source v :=sorry
