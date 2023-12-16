@@ -25,51 +25,24 @@ def SL2R : Type :=
 
 
 /- Definition of four charts that covers SL(2,ℝ )-/
-def Firstcover : Type :=
- { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z =1 ∧ x ≠ 0 }
-def Secondcover  : Type :=
-   { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z =1 ∧ y ≠ 0 }
-def Thirdcover   : Type :=
-  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z =1 ∧ z ≠ 0 }
-def Fourthcover : Type :=
-  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z =1 ∧ t ≠ 0 }
+
+
 /- This is use to define a topological structure on SL(2,ℝ)
 -/
 
 section
 
 instance : TopologicalSpace (SL2R) := instTopologicalSpaceSubtype
-instance : TopologicalSpace (Firstcover) := instTopologicalSpaceSubtype
-instance : TopologicalSpace (Secondcover) := by apply
-  instTopologicalSpaceSubtype
-instance : TopologicalSpace (Thirdcover) :=
-  instTopologicalSpaceSubtype
-instance : TopologicalSpace (Fourthcover) :=
-  instTopologicalSpaceSubtype
 
 open scoped Manifold
 
 
-/- Construction of the chart -/
-def Euclideanwithoutplane0 : Type :=
- { (x, y, z) : ℝ × ℝ × ℝ  | x ≠ 0 }
 
-def Euclideanwithoutplane1 : Type :=
-  { (x, y, z) : ℝ × ℝ × ℝ  | y ≠ 0 }
-def Euclideanwithoutplane2  [Zero (Fin 3)] : Type :=
- { (x, y, z) : ℝ × ℝ × ℝ  | z ≠ 0 }
 
-def Projection43 (x: EuclideanSpace ℝ (Fin 4) ) :
+def Euclideanwithoutplane : Type:= { (x, y, z) : ℝ × ℝ × ℝ  | x ≠ 0 ∨   y ≠ 0 ∨ z ≠ 0 }
 
-instance : TopologicalSpace (Euclideanwithoutplane0) :=
+instance : TopologicalSpace (Euclideanwithoutplane) :=
   instTopologicalSpaceSubtype
-
-instance : TopologicalSpace (Euclideanwithoutplane1) :=
-  instTopologicalSpaceSubtype
-instance : TopologicalSpace (Euclideanwithoutplane2) :=
-  instTopologicalSpaceSubtype
-
-
 
 
 
@@ -83,8 +56,9 @@ def inversefst (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := (a.1, a.2.1
 
 /- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
 @[simp]
-theorem nonzerofst (a: ℝ × ℝ × ℝ × ℝ )(ha: a.1 ≠ 0) : prodfst a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠0 } := by
-  intro B; exact ha B
+theorem nonzerofst (a: ℝ × ℝ × ℝ × ℝ )(ha: a.1 ≠ 0) : prodfst a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠0 ∨ y ≠ 0 ∨ z ≠ 0 } :=
+ by constructor; exact ha
+
 
 /- If the first coordiate is nonzero, we can go back to the First cover -/
 @[simp]
@@ -93,14 +67,90 @@ inversefst a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 }:= by
   simp;
   field_simp; ring_nf
 
+/-### The map of 2nd cover -/
+@[simp]
+def prodsnd (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.1, a.2.1,a.2.2.2)
+@[simp]
+def inversesnd (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := (a.1, a.2.1, (-1+a.2.2*a.1)/a.2.1, a.2.2)
+
+/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
+@[simp]
+theorem nonzerosnd (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.1 ≠  0) :
+prodsnd a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠ 0 ∨ y ≠0 ∨ z ≠ 0 } :=
+  by dsimp; refine Or.inr ?h; exact Or.inl ha
+/- If the first coordiate is nonzero, we can go back to the First cover -/
+@[simp]
+theorem nonzerosnd1 (a: ℝ × ℝ × ℝ   )(ha: a.2.1 ≠ 0) :
+inversesnd a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ y ≠ 0 }:= by
+  simp;
+  apply And.intro
+  .field_simp; ring
+  .exact ha
+
+/-### The map of 3nd cover -/
+@[simp]
+def prodtrd (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.1, a.2.2.1,a.2.2.2)
+@[simp]
+def inversetrd (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := (a.1, (-1+a.2.2*a.1)/a.2.1,a.2.1 , a.2.2)
+
+/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
+@[simp]
+theorem nonzerotrd (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.2.1 ≠ 0) : prodtrd a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠ 0 ∨ y ≠0 ∨ z ≠ 0 } :=
+ by simp; refine Or.inr ?h; exact Or.inl ha
+/- If the first coordiate is nonzero, we can go back to the First cover -/
+@[simp]
+theorem nonzerotrd1 (a: ℝ × ℝ × ℝ   )(ha: a.2.1 ≠ 0) :
+inversetrd a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ z ≠ 0 }:= by
+  simp;
+  apply And.intro
+  .field_simp; ring
+  .exact ha
+
+/-### The map of 4th cover -/
+@[simp]
+def prodfrth (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.2.1, a.2.2.1,a.2.2.2)
+@[simp]
+def inversefrth (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := ((1+a.2.1*a.1)/a.2.2, a.1,a.2.1 , a.2.2)
+
+/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
+@[simp]
+theorem nonzerofrth (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.2.2 ≠ 0) : prodfrth a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠ 0 ∨ y ≠0 ∨ z ≠ 0 }  := by
+simp; refine Or.inr ?h; exact Or.inr ha
+/- If the first coordiate is nonzero, we can go back to the First cover -/
+@[simp]
+theorem nonzerofrth1 (a: ℝ × ℝ × ℝ   )(ha: a.2.2 ≠ 0) :
+inversefrth a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ t ≠ 0 }:= by
+  simp;
+  apply And.intro
+  .field_simp; ring
+  .exact ha
+
+/-# Partition lemma-/
+/- Here I want to show that if x ∈ SL2R then x is nonzero, hence there must be a nonzero coordinate -/
+lemma zero (x: ℝ × ℝ × ℝ ×ℝ  )(hx: x.1 = 0 ∧ x.2.1=0 ∧ x.2.2.1 =0 ∧ x.2.2.2 =0): x = 0:=by
+ext
+apply And.left hx
+apply And.left (And.right hx)
+apply And.left (And.right (And.right hx))
+apply (hx.right).right.right
+
+lemma partition (x: SL2R): x.1 ≠ 0 ∨ x.1.2.1 ≠0 ∨ x.1.2.2.1 ≠ 0 ∨ x.1.2.2.2 ≠ 0 :=by sorry
 
 
-variable (a:SL2R)
 
-def phi1: PartialHomeomorph (SL2R) (ℝ × ℝ × ℝ ) where
-  toFun  := by exact fun a => (a.1.1, a.1.2.1, a.1.2.2.1)
-  invFun  x := by sorry
-  source := by exact Set.univ
+
+#check Set (SL2R)
+
+/-# Define the atlas-/
+
+
+def Firstcover : PartialHomeomorph (SL2R) (Euclideanwithoutplane ) where
+  toFun a :=by sorry
+  invFun x := by
+    constructor
+    .sorry
+    .apply inversefst x.1
+  source :=  by exact Set.univ
   target := by exact Set.univ
   map_source' := by simp
   map_target' := by simp
@@ -111,120 +161,69 @@ def phi1: PartialHomeomorph (SL2R) (ℝ × ℝ × ℝ ) where
   continuousOn_toFun := by simp; sorry
   continuousOn_invFun := by simp; sorry
 
-/-### The map of 2nd cover -/
-@[simp]
-def prodsnd (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.1, a.2.1,a.2.2.2)
-@[simp]
-def inversesnd (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := (a.1, a.2.1, (-1+a.2.2*a.1)/a.2.1, a.2.2)
-
-/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
-@[simp]
-theorem nonzerosnd (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.1 ≠ 0) : prodsnd a ∈ {(x,y,z): ℝ × ℝ × ℝ | y ≠0 } := by
-  exact ha
-/- If the first coordiate is nonzero, we can go back to the First cover -/
-@[simp]
-theorem nonzerosnd1 (a: ℝ × ℝ × ℝ   )(ha: a.2.1 ≠ 0) :
-inversesnd a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ y ≠ 0 }:= by
-  simp;
-  apply And.intro
-  .field_simp; ring
-  .exact ha
 
 
 
-def phi2 : PartialHomeomorph (Secondcover) (Euclideanwithoutplane1) where
+
+def Secondcover : PartialHomeomorph (SL2R) (Euclideanwithoutplane ) where
   toFun a := by
     constructor
-    . apply nonzerosnd; exact a.2.2
-  invFun a := by
+    .apply nonzerofst a.1;
+  invFun x := by
     constructor
-    apply nonzerosnd1; exact a.2
+    .sorry
+    .apply inversefst x.1
   source := by exact Set.univ
   target := by exact Set.univ
   map_source' := by simp
   map_target' := by simp
   left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by simp
+  right_inv' := by simp;
   open_source := by simp
   open_target := by simp
   continuousOn_toFun := by simp; sorry
   continuousOn_invFun := by simp; sorry
 
 
-/-### The map of 3nd cover -/
-@[simp]
-def prodtrd (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.1, a.2.2.1,a.2.2.2)
-@[simp]
-def inversetrd (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := (a.1, (-1+a.2.2*a.1)/a.2.1,a.2.1 , a.2.2)
-
-/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
-@[simp]
-theorem nonzerotrd (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.2.1 ≠ 0) : prodtrd a ∈ {(x,y,z): ℝ × ℝ × ℝ | y ≠0 } := by
-  exact ha
-/- If the first coordiate is nonzero, we can go back to the First cover -/
-@[simp]
-theorem nonzerotrd1 (a: ℝ × ℝ × ℝ   )(ha: a.2.1 ≠ 0) :
-inversetrd a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ z ≠ 0 }:= by
-  simp;
-  apply And.intro
-  .field_simp; ring
-  .exact ha
 
 
-
-def phi3 : PartialHomeomorph (Thirdcover) (Euclideanwithoutplane1) where
+def Thirdcover : PartialHomeomorph (SL2R) (Euclideanwithoutplane ) where
   toFun a := by
     constructor
-    . apply nonzerotrd; exact a.2.2
-  invFun a := by
+    .apply nonzerofst a.1; sorry
+  invFun x := by
     constructor
-    apply nonzerotrd1; exact a.2
+    .sorry
+    .apply inversefst x.1
   source := by exact Set.univ
   target := by exact Set.univ
   map_source' := by simp
   map_target' := by simp
   left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by simp
+  right_inv' := by simp;
   open_source := by simp
   open_target := by simp
   continuousOn_toFun := by simp; sorry
   continuousOn_invFun := by simp; sorry
 
 
-/-### The map of 4th cover -/
-@[simp]
-def prodfrth (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.2.1, a.2.2.1,a.2.2.2)
-@[simp]
-def inversefrth (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := ((1+a.2.1*a.1)/a.2.2, a.1,a.2.1 , a.2.2)
-
-/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
-@[simp]
-theorem nonzerofrth (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.2.2 ≠ 0) : prodfrth a ∈ {(x,y,z): ℝ × ℝ × ℝ | z ≠0 } := by
-  exact ha
-/- If the first coordiate is nonzero, we can go back to the First cover -/
-@[simp]
-theorem nonzerofrth1 (a: ℝ × ℝ × ℝ   )(ha: a.2.2 ≠ 0) :
-inversefrth a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ t ≠ 0 }:= by
-  simp;
-  apply And.intro
-  .field_simp; ring
-  .exact ha
 
 
 
-def phi4 : PartialHomeomorph (Fourthcover) (Euclideanwithoutplane2) where
+def Fourthcover : PartialHomeomorph (SL2R) (Euclideanwithoutplane ) where
   toFun a := by
     constructor
-    . apply nonzerofrth; exact a.2.2
-  invFun a := by
+    .apply nonzerofst a.1; sorry
+  invFun x := by
     constructor
-    apply nonzerofrth1; exact a.2
+    .sorry
+    .apply inversefst x.1
   source := by exact Set.univ
   target := by exact Set.univ
   map_source' := by simp
   map_target' := by simp
   left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by simp
+  right_inv' := by simp;
   open_source := by simp
   open_target := by simp
   continuousOn_toFun := by simp; sorry
@@ -239,16 +238,16 @@ def phi4 : PartialHomeomorph (Fourthcover) (Euclideanwithoutplane2) where
 ### Charted space structure on the SL(2,ℝ )
 
 In this section we construct a charted space structure on the SL(2,ℝ ) in a finite-dimensional
-real space `ℝ × ℝ × \R  `; that is, we show that it is locally homeomorphic to the Euclidean
-space of dimension one less than `E`.
+real space `ℝ × ℝ × ℝ   `.
 -/
 section ChartedSpace
 
 instance chartedSpace  :
-    ChartedSpace (SL2R) (ℝ × ℝ × ℝ ) where
-  atlas := sorry
-  chartAt v := sorry
-  mem_chart_source v :=sorry
-  chart_mem_atlas v :=sorry
+    ChartedSpace  (Euclideanwithoutplane ) (SL2R) where
+  atlas := {Firstcover, Secondcover, Thirdcover, Fourthcover}
+  chartAt v := if v.1 ≠ 0 then Firstcover
+            else if v.1.2.1 ≠ 0 then Secondcover else if v.1.2.2.1 ≠ 0 then Thirdcover else Fourthcover
+  mem_chart_source v := by simp; sorry
+  chart_mem_atlas v := by simp; constructor; sorry
 
 section SmoothManifold
