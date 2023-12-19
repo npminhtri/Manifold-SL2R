@@ -22,8 +22,35 @@ noncomputable section
 def SL2R : Type :=
    { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*y-z*t =1 }
 deriving TopologicalSpace
+instance : TopologicalSpace (ℝ × ℝ × ℝ× ℝ  ) := by exact instTopologicalSpaceProd
 
 instance : Inhabited SL2R := ⟨⟨(1,1,0,0), by simp⟩⟩
+
+
+theorem closedspacex : IsClosed ({(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x =0}):= by
+simp
+refine isClosed_eq ?hf ?hg
+. exact continuous_fst
+. exact continuous_const
+
+
+theorem closedspacez : IsClosed ({(x,y,z,t): ℝ × ℝ × ℝ × ℝ| z =0}):= by
+simp
+refine isClosed_eq ?hf ?hg
+.refine Continuous.fst ?hf.hf; refine Continuous.snd ?hf.hf.hf; exact continuous_snd
+.exact continuous_const
+
+theorem closedplanex: IsClosed ({(x,y,z): ℝ × ℝ × ℝ | x =0}):= by
+simp
+refine isClosed_eq ?hf ?hg
+. exact continuous_fst
+. exact continuous_const
+
+theorem closedplanez: IsClosed ({(x,y,z): ℝ × ℝ × ℝ | z =0}):= by
+simp
+refine isClosed_eq ?hf ?hg
+. refine Continuous.snd ?hf.hf; exact continuous_snd
+. exact continuous_const
 
 
 theorem elementSL2R (b:ℝ × ℝ × ℝ × ℝ) (hb : b ∈ { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*y-z*t =1 }):
@@ -58,7 +85,7 @@ def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
   source := { ⟨(x,y,z,w),h⟩ : SL2R | x ≠ 0 }
   target := { (x,y,z) : ℝ × ℝ ×ℝ | x ≠ 0  }
   map_source' := by intro x hx;simp; intro a; apply hx a
-  map_target' x hx := by simp; sorry
+  map_target' x hx := by simp; rw [dif_neg]; exact hx; exact hx
   left_inv' x hx := by
     refine dite_eq_iff'.mpr ?_
     apply And.intro
@@ -68,10 +95,8 @@ def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
       ext; simp; field_simp; rw[mul_comm ]; simp; simp
   right_inv' x hx := by
     field_simp
-    ext
-    .sorry
-    .sorry
-    .sorry
+    rw[dif_neg]
+    assumption
   open_source := by
     simp
     refine IsClosed.not ?_
@@ -79,42 +104,27 @@ def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
     let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x = 0}
     use t
     constructor
-    .sorry
-    .sorry
-  open_target :=  by dsimp; refine IsClosed.not ?_; refine IsSeqClosed.isClosed ?hs; sorry
-  continuousOn_toFun := by simp; sorry
-  continuousOn_invFun := sorry
+    .apply closedspacex
+    . rfl
+  open_target :=  by dsimp; refine IsClosed.not ?_; exact closedplanex
+  continuousOn_toFun := by
+    simp
+    apply Continuous.continuousOn
+    simp
+    constructor
+    . refine Continuous.star ?h.left.hf; refine Continuous.fst ?h.left.hf.hf; exact
+      continuous_induced_dom
+    .constructor; refine Continuous.star ?h.right.left.hf; refine Continuous.fst ?h.right.left.hf.hf; refine
+      Continuous.snd ?h.right.left.hf.hf.hf; refine Continuous.snd ?h.right.left.hf.hf.hf.hf; exact
+        continuous_induced_dom; refine Continuous.star ?h.right.right.hf; refine
+          Continuous.snd ?h.right.right.hf.hf; refine Continuous.snd ?h.right.right.hf.hf.hf; refine Continuous.snd ?h.right.right.hf.hf.hf.hf;exact
+            continuous_induced_dom
+  continuousOn_invFun := by
+    simp
+    apply Continuous.continuousOn
+    sorry
 
-def chart2 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
-  toFun := fun ⟨(x,y,z,w),h⟩ => (y,z,w)
-  invFun := fun (y,z,w) => if h : y = 0 then default else ⟨((1+z*w)/y,y,z,w), by field_simp ; ring⟩
-  source := { ⟨(x,y,z,w),h⟩ : SL2R | y ≠ 0 }
-  target := { (y,z,w) : ℝ × ℝ ×ℝ | y ≠ 0  }
-  map_source' := by intro x hx;simp; intro a; apply hx a
-  map_target' x hx := by simp; sorry
-  left_inv' x hx := by
-    refine dite_eq_iff'.mpr ?_
-    apply And.intro
-    .exact fun h => (hx h).elim
-    . field_simp
-  right_inv' x hx := by
-    field_simp
-    ext
-    .sorry
-    .sorry
-    .sorry
-  open_source := by
-    simp
-    refine IsClosed.not ?_
-    refine isClosed_induced_iff.mpr ?_
-    let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x = 0}
-    use t
-    constructor
-    .sorry
-    .sorry
-  open_target :=  by dsimp; refine IsClosed.not ?_; refine IsSeqClosed.isClosed ?hs; sorry
-  continuousOn_toFun := by simp; sorry
-  continuousOn_invFun := sorry
+
 
 def chart3 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
   toFun := fun ⟨(x,y,z,w),h⟩ => (x,y,z)
@@ -122,7 +132,7 @@ def chart3 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
   source := { ⟨(x,y,z,w),h⟩ : SL2R | z ≠ 0 }
   target := { (x,y,z) : ℝ × ℝ ×ℝ | z ≠ 0  }
   map_source' := by intro x hx;simp; intro a; apply hx a
-  map_target' x hx := by simp; sorry
+  map_target' x hx := by simp;rw [dif_neg]; exact hx; exact hx
   left_inv' x hx := by
     refine dite_eq_iff'.mpr ?_
     apply And.intro
@@ -130,54 +140,41 @@ def chart3 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
     .intro h; ext; simp; simp; simp; field_simp; rw[mul_comm]
   right_inv' x hx := by
     field_simp
-    ext
-    .sorry
-    .sorry
-    .sorry
+    rw[dif_neg]
+    assumption
   open_source := by
     simp
     refine IsClosed.not ?_
     refine isClosed_induced_iff.mpr ?_
-    let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x = 0}
+    let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| z = 0}
     use t
     constructor
-    .sorry
-    .sorry
-  open_target :=  by dsimp; refine IsClosed.not ?_; refine IsSeqClosed.isClosed ?hs; sorry
-  continuousOn_toFun := by simp; sorry
+    .apply closedspacez
+    .rfl
+  open_target :=  by dsimp; refine IsClosed.not ?_;exact closedplanez
+  continuousOn_toFun := by
+    simp
+    apply Continuous.continuousOn
+    simp
+    apply And.intro
+    .refine Continuous.star ?h.left.hf; refine Continuous.fst ?h.left.hf.hf; exact
+      continuous_induced_dom
+    .constructor; refine Continuous.star ?h.right.left.hf; refine Continuous.fst ?h.right.left.hf.hf; refine
+      Continuous.snd ?h.right.left.hf.hf.hf; exact continuous_induced_dom; refine
+        Continuous.fst ?h.right.right.hf; refine Continuous.snd ?h.right.right.hf.hf;refine
+          Continuous.snd ?h.right.right.hf.hf.hf; exact continuous_induced_dom
+
   continuousOn_invFun := sorry
 
-
-def chart4 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
-  toFun := fun ⟨(x,y,z,w),h⟩ => (x,y,w)
-  invFun := fun (x,y,w) => if h :  w = 0 then default else ⟨(x,y,(x*y-1)/w,w), by field_simp⟩
-  source := { ⟨(x,y,z,w),h⟩ : SL2R | w ≠ 0 }
-  target := { (x,y,w) : ℝ × ℝ ×ℝ | w ≠ 0  }
-  map_source' := by intro x hx;simp; intro a; apply hx a
-  map_target' x hx := by simp; sorry
-  left_inv' x hx := by
-    refine dite_eq_iff'.mpr ?_
+/-refine continuous_prod_mk.mpr ?h.a
     apply And.intro
-    .exact fun h => (hx h).elim
-    .intro h; ext; simp; simp; field_simp; simp
-  right_inv' x hx := by
-    field_simp
-    ext
-    .sorry
-    .sorry
-    .sorry
-  open_source := by
-    simp
-    refine IsClosed.not ?_
-    refine isClosed_induced_iff.mpr ?_
-    let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x = 0}
-    use t
-    constructor
-    .sorry
-    .sorry
-  open_target :=  by dsimp; refine IsClosed.not ?_; refine IsSeqClosed.isClosed ?hs; sorry
-  continuousOn_toFun := by simp; sorry
-  continuousOn_invFun := by simp; sorry
+    .refine Continuous.fst ?h.a.left.hf; exact continuous_induced_dom
+    . refine continuous_prod_mk.mpr {
+      left := by refine Continuous.fst ?hf; refine Continuous.snd ?hf.hf;exact
+        continuous_induced_dom
+      right := by sorry
+    }
+    -/
 
 /-!
 ### Charted space structure on the SL(2,ℝ )
@@ -186,9 +183,8 @@ In this section we construct a charted space structure on the SL(2,ℝ ) in a fi
 real space `ℝ × ℝ × ℝ   `.
 -/
 section ChartedSpace
-variable (a: SL2R)
-#check a.1.1
-instance chartedSpace  :
+
+instance chartedSpace   :
     ChartedSpace  (ℝ × ℝ × ℝ) (SL2R) where
   atlas := { chart1,chart3}
   chartAt v := if v.1.1 ≠ 0 then chart1 else chart3
@@ -199,3 +195,9 @@ instance chartedSpace  :
   chart_mem_atlas v := by by_cases h': v.1.1 = 0 ; simp[h']; simp[h']
 
 section SmoothManifold
+  notation "𝓡" =>
+    (modelWithCornersSelf ℝ (ℝ × ℝ × ℝ ) :
+      ModelWithCorners ℝ (ℝ × ℝ × ℝ) (ℝ × ℝ × ℝ))
+
+instance Icc_smooth_manifold  :
+    SmoothManifoldWithCorners (𝓡) (SL2R):= by sorry
