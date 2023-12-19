@@ -13,7 +13,6 @@ import Mathlib.Data.Real.Basic
 
 def hello_world := hello ++ " world"
 
-universe u
 open TopologicalSpace
 noncomputable section
 
@@ -21,218 +20,164 @@ noncomputable section
 
 /- Definition of SL(2,ℝ ) and charts by hand -/
 def SL2R : Type :=
-   { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z =1 }
+   { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*y-z*t =1 }
+deriving TopologicalSpace
+
+instance : Inhabited SL2R := ⟨⟨(1,1,0,0), by simp⟩⟩
 
 
-/- Definition of four charts that covers SL(2,ℝ )-/
-
-
-/- This is use to define a topological structure on SL(2,ℝ)
--/
-
-section
-
-instance : TopologicalSpace (SL2R) := instTopologicalSpaceSubtype
-
-open scoped Manifold
+theorem elementSL2R (b:ℝ × ℝ × ℝ × ℝ) (hb : b ∈ { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*y-z*t =1 }):
+1 = b.1*b.2.1-b.2.2.1 * b.2.2.2:=by exact
+  ((fun {z} => Complex.ofReal_eq_one.mp) (congrArg Complex.ofReal' hb)).symm
 
 
 
+@[ext]
+theorem SL2R.ext (x y: SL2R)(h1: x.1 = y.1) : x = y := by exact Subtype.eq h1
 
-def Euclideanwithoutplane : Type:= { (x, y, z) : ℝ × ℝ × ℝ  | x ≠ 0 ∨   y ≠ 0 ∨ z ≠ 0 }
-
-instance : TopologicalSpace (Euclideanwithoutplane) :=
-  instTopologicalSpaceSubtype
-
-
-
-/- Define the homeomorphism between each cover and a subet set in ℝ³. Here phij denotes the map of i-th cover
-### The map of 1st cover
--/
 @[simp]
-def prodfst (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.1, a.2.1,a.2.2.1)
+theorem SL2R.eq1 (x: SL2R) : 1 + x.1.2.2.1 * x.1.2.2.2 = x.1.1*x.1.2.1 :=by
+  have h:  1 = x.1.1*x.1.2.1-x.1.2.2.1 * x.1.2.2.2
+  . apply elementSL2R; exact x.property
+  .exact add_eq_of_eq_sub h
 @[simp]
-def inversefst (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := (a.1, a.2.1, a.2.2, (1+a.2.1*a.2.2)/(a.1))
-
-/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
-@[simp]
-theorem nonzerofst (a: ℝ × ℝ × ℝ × ℝ )(ha: a.1 ≠ 0) : prodfst a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠0 ∨ y ≠ 0 ∨ z ≠ 0 } :=
- by constructor; exact ha
+theorem SL2R.eq2 (x: SL2R) :   x.1.1*x.1.2.1 - 1 =x.1.2.2.1 * x.1.2.2.2 :=by
+  have h:  1 = x.1.1*x.1.2.1-x.1.2.2.1 * x.1.2.2.2
+  . apply elementSL2R; exact x.property
+  . ring_nf; rw [@neg_add_eq_iff_eq_add]; rw [eq1]
 
 
-/- If the first coordiate is nonzero, we can go back to the First cover -/
-@[simp]
-theorem nonzerofst1 (a: ℝ × ℝ × ℝ   )(ha: a.1 ≠ 0) :
-inversefst a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 }:= by
-  simp;
-  field_simp; ring_nf
+theorem SL2Rzero (x: SL2R)(hx: x.1.1 =0): x.1.2.2.1 ≠ 0:= by
+have:  1 = x.1.1*x.1.2.1-x.1.2.2.1 * x.1.2.2.2
+.apply elementSL2R; exact x.property
+.rw[hx] at this; simp at this; intro a; rw[a] at this; simp at this
 
-/-### The map of 2nd cover -/
-@[simp]
-def prodsnd (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.1, a.2.1,a.2.2.2)
-@[simp]
-def inversesnd (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := (a.1, a.2.1, (-1+a.2.2*a.1)/a.2.1, a.2.2)
-
-/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
-@[simp]
-theorem nonzerosnd (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.1 ≠  0) :
-prodsnd a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠ 0 ∨ y ≠0 ∨ z ≠ 0 } :=
-  by dsimp; refine Or.inr ?h; exact Or.inl ha
-/- If the first coordiate is nonzero, we can go back to the First cover -/
-@[simp]
-theorem nonzerosnd1 (a: ℝ × ℝ × ℝ   )(ha: a.2.1 ≠ 0) :
-inversesnd a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ y ≠ 0 }:= by
-  simp;
-  apply And.intro
-  .field_simp; ring
-  .exact ha
-
-/-### The map of 3nd cover -/
-@[simp]
-def prodtrd (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.1, a.2.2.1,a.2.2.2)
-@[simp]
-def inversetrd (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := (a.1, (-1+a.2.2*a.1)/a.2.1,a.2.1 , a.2.2)
-
-/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
-@[simp]
-theorem nonzerotrd (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.2.1 ≠ 0) : prodtrd a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠ 0 ∨ y ≠0 ∨ z ≠ 0 } :=
- by simp; refine Or.inr ?h; exact Or.inl ha
-/- If the first coordiate is nonzero, we can go back to the First cover -/
-@[simp]
-theorem nonzerotrd1 (a: ℝ × ℝ × ℝ   )(ha: a.2.1 ≠ 0) :
-inversetrd a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ z ≠ 0 }:= by
-  simp;
-  apply And.intro
-  .field_simp; ring
-  .exact ha
-
-/-### The map of 4th cover -/
-@[simp]
-def prodfrth (a: ℝ × ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ :=  (a.2.1, a.2.2.1,a.2.2.2)
-@[simp]
-def inversefrth (a: ℝ × ℝ × ℝ  ) :ℝ × ℝ × ℝ × ℝ := ((1+a.2.1*a.1)/a.2.2, a.1,a.2.1 , a.2.2)
-
-/- If a vector ∈ ℝ⁴ has nonzero first coordinate, then so is it projection on the space spanned by the first three coordinate -/
-@[simp]
-theorem nonzerofrth (a: ℝ × ℝ × ℝ × ℝ )(ha: a.2.2.2 ≠ 0) : prodfrth a ∈ {(x,y,z): ℝ × ℝ × ℝ | x ≠ 0 ∨ y ≠0 ∨ z ≠ 0 }  := by
-simp; refine Or.inr ?h; exact Or.inr ha
-/- If the first coordiate is nonzero, we can go back to the First cover -/
-@[simp]
-theorem nonzerofrth1 (a: ℝ × ℝ × ℝ   )(ha: a.2.2 ≠ 0) :
-inversefrth a ∈  { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*t-y*z=1 ∧ t ≠ 0 }:= by
-  simp;
-  apply And.intro
-  .field_simp; ring
-  .exact ha
-
-/-# Partition lemma-/
-/- Here I want to show that if x ∈ SL2R then x is nonzero, hence there must be a nonzero coordinate -/
-lemma zero (x: ℝ × ℝ × ℝ ×ℝ  )(hx: x.1 = 0 ∧ x.2.1=0 ∧ x.2.2.1 =0 ∧ x.2.2.2 =0): x = 0:=by
-ext
-apply And.left hx
-apply And.left (And.right hx)
-apply And.left (And.right (And.right hx))
-apply (hx.right).right.right
-
-lemma partition (x: SL2R): x.1 ≠ 0 ∨ x.1.2.1 ≠0 ∨ x.1.2.2.1 ≠ 0 ∨ x.1.2.2.2 ≠ 0 :=by sorry
-
-
-
-
-#check Set (SL2R)
-
-/-# Define the atlas-/
-
-
-def Firstcover : PartialHomeomorph (SL2R) (Euclideanwithoutplane ) where
-  toFun a :=by sorry
-  invFun x := by
+def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
+  toFun := fun ⟨(x,y,z,w),h⟩ => (x,z,w)
+  invFun := fun (x,z,w) => if h : x = 0 then default else ⟨(x,(1+z*w)/x,z,w), by field_simp ; ring⟩
+  source := { ⟨(x,y,z,w),h⟩ : SL2R | x ≠ 0 }
+  target := { (x,y,z) : ℝ × ℝ ×ℝ | x ≠ 0  }
+  map_source' := by intro x hx;simp; intro a; apply hx a
+  map_target' x hx := by simp; sorry
+  left_inv' x hx := by
+    refine dite_eq_iff'.mpr ?_
+    apply And.intro
+    .exact fun h => (hx h).elim
+    . field_simp
+      intro H
+      ext; simp; field_simp; rw[mul_comm ]; simp; simp
+  right_inv' x hx := by
+    field_simp
+    ext
+    .sorry
+    .sorry
+    .sorry
+  open_source := by
+    simp
+    refine IsClosed.not ?_
+    refine isClosed_induced_iff.mpr ?_
+    let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x = 0}
+    use t
     constructor
     .sorry
-    .apply inversefst x.1
-  source :=  by exact Set.univ
-  target := by exact Set.univ
-  map_source' := by simp
-  map_target' := by simp
-  left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by simp; sorry
-  open_source := by simp
-  open_target := by simp
+    .sorry
+  open_target :=  by dsimp; refine IsClosed.not ?_; refine IsSeqClosed.isClosed ?hs; sorry
   continuousOn_toFun := by simp; sorry
-  continuousOn_invFun := by simp; sorry
+  continuousOn_invFun := sorry
 
-
-
-
-
-def Secondcover : PartialHomeomorph (SL2R) (Euclideanwithoutplane ) where
-  toFun a := by
-    constructor
-    .apply nonzerofst a.1;
-  invFun x := by
+def chart2 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
+  toFun := fun ⟨(x,y,z,w),h⟩ => (y,z,w)
+  invFun := fun (y,z,w) => if h : y = 0 then default else ⟨((1+z*w)/y,y,z,w), by field_simp ; ring⟩
+  source := { ⟨(x,y,z,w),h⟩ : SL2R | y ≠ 0 }
+  target := { (y,z,w) : ℝ × ℝ ×ℝ | y ≠ 0  }
+  map_source' := by intro x hx;simp; intro a; apply hx a
+  map_target' x hx := by simp; sorry
+  left_inv' x hx := by
+    refine dite_eq_iff'.mpr ?_
+    apply And.intro
+    .exact fun h => (hx h).elim
+    . field_simp
+  right_inv' x hx := by
+    field_simp
+    ext
+    .sorry
+    .sorry
+    .sorry
+  open_source := by
+    simp
+    refine IsClosed.not ?_
+    refine isClosed_induced_iff.mpr ?_
+    let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x = 0}
+    use t
     constructor
     .sorry
-    .apply inversefst x.1
-  source := by exact Set.univ
-  target := by exact Set.univ
-  map_source' := by simp
-  map_target' := by simp
-  left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by simp;
-  open_source := by simp
-  open_target := by simp
+    .sorry
+  open_target :=  by dsimp; refine IsClosed.not ?_; refine IsSeqClosed.isClosed ?hs; sorry
   continuousOn_toFun := by simp; sorry
-  continuousOn_invFun := by simp; sorry
+  continuousOn_invFun := sorry
 
-
-
-
-def Thirdcover : PartialHomeomorph (SL2R) (Euclideanwithoutplane ) where
-  toFun a := by
-    constructor
-    .apply nonzerofst a.1; sorry
-  invFun x := by
+def chart3 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
+  toFun := fun ⟨(x,y,z,w),h⟩ => (x,y,z)
+  invFun := fun (x,y,z) => if h :  z = 0 then default else ⟨(x,y,z,(x*y-1)/z), by field_simp ; ring⟩
+  source := { ⟨(x,y,z,w),h⟩ : SL2R | z ≠ 0 }
+  target := { (x,y,z) : ℝ × ℝ ×ℝ | z ≠ 0  }
+  map_source' := by intro x hx;simp; intro a; apply hx a
+  map_target' x hx := by simp; sorry
+  left_inv' x hx := by
+    refine dite_eq_iff'.mpr ?_
+    apply And.intro
+    .exact fun h => (hx h).elim
+    .intro h; ext; simp; simp; simp; field_simp; rw[mul_comm]
+  right_inv' x hx := by
+    field_simp
+    ext
+    .sorry
+    .sorry
+    .sorry
+  open_source := by
+    simp
+    refine IsClosed.not ?_
+    refine isClosed_induced_iff.mpr ?_
+    let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x = 0}
+    use t
     constructor
     .sorry
-    .apply inversefst x.1
-  source := by exact Set.univ
-  target := by exact Set.univ
-  map_source' := by simp
-  map_target' := by simp
-  left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by simp;
-  open_source := by simp
-  open_target := by simp
+    .sorry
+  open_target :=  by dsimp; refine IsClosed.not ?_; refine IsSeqClosed.isClosed ?hs; sorry
   continuousOn_toFun := by simp; sorry
-  continuousOn_invFun := by simp; sorry
+  continuousOn_invFun := sorry
 
 
-
-
-
-def Fourthcover : PartialHomeomorph (SL2R) (Euclideanwithoutplane ) where
-  toFun a := by
-    constructor
-    .apply nonzerofst a.1; sorry
-  invFun x := by
+def chart4 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
+  toFun := fun ⟨(x,y,z,w),h⟩ => (x,y,w)
+  invFun := fun (x,y,w) => if h :  w = 0 then default else ⟨(x,y,(x*y-1)/w,w), by field_simp⟩
+  source := { ⟨(x,y,z,w),h⟩ : SL2R | w ≠ 0 }
+  target := { (x,y,w) : ℝ × ℝ ×ℝ | w ≠ 0  }
+  map_source' := by intro x hx;simp; intro a; apply hx a
+  map_target' x hx := by simp; sorry
+  left_inv' x hx := by
+    refine dite_eq_iff'.mpr ?_
+    apply And.intro
+    .exact fun h => (hx h).elim
+    .intro h; ext; simp; simp; field_simp; simp
+  right_inv' x hx := by
+    field_simp
+    ext
+    .sorry
+    .sorry
+    .sorry
+  open_source := by
+    simp
+    refine IsClosed.not ?_
+    refine isClosed_induced_iff.mpr ?_
+    let t:={(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x = 0}
+    use t
     constructor
     .sorry
-    .apply inversefst x.1
-  source := by exact Set.univ
-  target := by exact Set.univ
-  map_source' := by simp
-  map_target' := by simp
-  left_inv' x:= by simp; ring_nf; sorry
-  right_inv' := by simp;
-  open_source := by simp
-  open_target := by simp
+    .sorry
+  open_target :=  by dsimp; refine IsClosed.not ?_; refine IsSeqClosed.isClosed ?hs; sorry
   continuousOn_toFun := by simp; sorry
   continuousOn_invFun := by simp; sorry
-
-
-
-
-
 
 /-!
 ### Charted space structure on the SL(2,ℝ )
@@ -241,13 +186,16 @@ In this section we construct a charted space structure on the SL(2,ℝ ) in a fi
 real space `ℝ × ℝ × ℝ   `.
 -/
 section ChartedSpace
-
+variable (a: SL2R)
+#check a.1.1
 instance chartedSpace  :
-    ChartedSpace  (Euclideanwithoutplane ) (SL2R) where
-  atlas := {Firstcover, Secondcover, Thirdcover, Fourthcover}
-  chartAt v := if v.1 ≠ 0 then Firstcover
-            else if v.1.2.1 ≠ 0 then Secondcover else if v.1.2.2.1 ≠ 0 then Thirdcover else Fourthcover
-  mem_chart_source v := by simp; sorry
-  chart_mem_atlas v := by simp; constructor; sorry
+    ChartedSpace  (ℝ × ℝ × ℝ) (SL2R) where
+  atlas := { chart1,chart3}
+  chartAt v := if v.1.1 ≠ 0 then chart1 else chart3
+  mem_chart_source v := by
+    by_cases h': v.1.1 = 0
+    · simp[h']; intro a; apply SL2Rzero; exact h'; exact a
+    · simp[h']; intro a; exact h' a
+  chart_mem_atlas v := by by_cases h': v.1.1 = 0 ; simp[h']; simp[h']
 
 section SmoothManifold
