@@ -126,6 +126,10 @@ def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
 
 
 
+
+
+
+
 def chart3 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
   toFun := fun ⟨(x,y,z,w),h⟩ => (x,y,z)
   invFun := fun (x,y,z) => if h :  z = 0 then default else ⟨(x,y,z,(x*y-1)/z), by field_simp ; ring⟩
@@ -163,7 +167,6 @@ def chart3 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
       Continuous.snd ?h.right.left.hf.hf.hf; exact continuous_induced_dom; refine
         Continuous.fst ?h.right.right.hf; refine Continuous.snd ?h.right.right.hf.hf;refine
           Continuous.snd ?h.right.right.hf.hf.hf; exact continuous_induced_dom
-
   continuousOn_invFun := sorry
 
 /-refine continuous_prod_mk.mpr ?h.a
@@ -199,5 +202,12 @@ section SmoothManifold
     (modelWithCornersSelf ℝ (ℝ × ℝ × ℝ ) :
       ModelWithCorners ℝ (ℝ × ℝ × ℝ) (ℝ × ℝ × ℝ))
 
-instance Icc_smooth_manifold  :
-    SmoothManifoldWithCorners (𝓡) (SL2R):= by sorry
+instance SL2R_smooth_manifold  :
+    SmoothManifoldWithCorners (𝓡) (SL2R):= by
+    refine
+      smoothManifoldWithCorners_of_contDiffOn (modelWithCornersSelf ℝ (ℝ × ℝ × ℝ)) SL2R ?h
+    intro e e' he he'
+    simp only[atlas] at he he'
+    rcases he with (rfl | rfl) <;> rcases he' with (rfl | rfl)
+    · -- `e = left chart`, `e' = left chart`
+      simp;sorry
