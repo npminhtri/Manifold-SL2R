@@ -199,7 +199,6 @@ instance SL2R_smooth_manifold  :
     · -- `e =  chart 1`, `e' = left chart 1`
       simp
       refine ContDiff.contDiffOn ?h.inl.inl.h
-
       sorry
     . -- `e = left chart 1`, `e' = right chart 3`
       simp; sorry
