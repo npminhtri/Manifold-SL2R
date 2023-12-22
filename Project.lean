@@ -27,13 +27,13 @@ instance : TopologicalSpace (ℝ × ℝ × ℝ× ℝ  ) := by exact instTopologi
 
 instance : Inhabited SL2R := ⟨⟨(1,1,0,0), by simp⟩⟩
 
+/- The closedness of the spaces/plane  x=0, z=0 -/
 
 theorem closedspacex : IsClosed ({(x,y,z,t): ℝ × ℝ × ℝ × ℝ| x =0}):= by
 simp
 refine isClosed_eq ?hf ?hg
 . exact continuous_fst
 . exact continuous_const
-
 
 theorem closedspacez : IsClosed ({(x,y,z,t): ℝ × ℝ × ℝ × ℝ| z =0}):= by
 simp
@@ -53,18 +53,16 @@ refine isClosed_eq ?hf ?hg
 . refine Continuous.snd ?hf.hf; exact continuous_snd
 . exact continuous_const
 
-
+/-Extract the property of an element in SL2R -/
 theorem elementSL2R (b:ℝ × ℝ × ℝ × ℝ) (hb : b ∈ { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*y-z*t =1 }):
 1 = b.1*b.2.1-b.2.2.1 * b.2.2.2:=by exact
   ((fun {z} => Complex.ofReal_eq_one.mp) (congrArg Complex.ofReal' hb)).symm
 
-
-
-
-
+/- ext command for SL2R as an element in ℝ × ℝ × ℝ × ℝ-/
 @[ext]
 theorem SL2R.ext (x y: SL2R)(h1: x.1 = y.1) : x = y := by exact Subtype.eq h1
 
+/- Auxialarry proposition I used to construct charts.-/
 @[simp]
 theorem SL2R.eq1 (x: SL2R) : 1 + x.1.2.2.1 * x.1.2.2.2 = x.1.1*x.1.2.1 :=by
   have h:  1 = x.1.1*x.1.2.1-x.1.2.2.1 * x.1.2.2.2
@@ -81,12 +79,7 @@ have:  1 = x.1.1*x.1.2.1-x.1.2.2.1 * x.1.2.2.2
 .apply elementSL2R; exact x.property
 .rw[hx] at this; simp at this; intro a; rw[a] at this; simp at this
 
-def f34: ℝ × ℝ × ℝ → ℝ × ℝ × ℝ × ℝ:= fun x => (x.1,x.2.1,x.2.2) => (x.1,(1+x.2.2*x.2.1)/x.1,x.2.1,x.2.2)
-
-
-
-
-
+/- Construct the first map from  SL2R to {(x,y,z): ℝ × ℝ × ℝ | x ≠ 0} -/
 def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
   toFun := fun ⟨(x,y,z,w),h⟩ => (x,z,w)
   invFun := fun (x,z,w) => if h : x = 0 then default else ⟨(x,(1+z*w)/x,z,w), by field_simp ; ring⟩
@@ -134,6 +127,7 @@ def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
 
 
 
+/- Construct the second map from SL2R to {(x,y,z): ℝ × ℝ × ℝ | z ≠ 0} -/
 
 def chart3 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
   toFun := fun ⟨(x,y,z,w),h⟩ => (x,y,z)
@@ -205,6 +199,7 @@ instance SL2R_smooth_manifold  :
     · -- `e =  chart 1`, `e' = left chart 1`
       simp
       refine ContDiff.contDiffOn ?h.inl.inl.h
+
       sorry
     . -- `e = left chart 1`, `e' = right chart 3`
       simp; sorry

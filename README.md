@@ -83,6 +83,6 @@ The main reference I used for this project are:
 
 2. Thread Explicitly giving an atlas to make SL(2,R) a smooth manifold: https://math.stackexchange.com/questions/3539708/explicitly-giving-an-atlas-to-make-sl2-mathbbr-a-smooth-manifold
 
-
+3. The Real.lean and Sphere.lean for reference on how to give the lean code.
 
 
