@@ -53,13 +53,14 @@ refine isClosed_eq ?hf ?hg
 . refine Continuous.snd ?hf.hf; exact continuous_snd
 . exact continuous_const
 
-theorem closurex: closure({(x,y,z): ℝ × ℝ × ℝ | x =0}) = ({(x,y,z): ℝ × ℝ × ℝ | x =0}) :=by
 
 theorem elementSL2R (b:ℝ × ℝ × ℝ × ℝ) (hb : b ∈ { (x, y, z,t) : ℝ × ℝ × ℝ × ℝ | x*y-z*t =1 }):
 1 = b.1*b.2.1-b.2.2.1 * b.2.2.2:=by exact
   ((fun {z} => Complex.ofReal_eq_one.mp) (congrArg Complex.ofReal' hb)).symm
 
-theorem closure
+
+
+
 
 @[ext]
 theorem SL2R.ext (x y: SL2R)(h1: x.1 = y.1) : x = y := by exact Subtype.eq h1
@@ -79,6 +80,12 @@ theorem SL2Rzero (x: SL2R)(hx: x.1.1 =0): x.1.2.2.1 ≠ 0:= by
 have:  1 = x.1.1*x.1.2.1-x.1.2.2.1 * x.1.2.2.2
 .apply elementSL2R; exact x.property
 .rw[hx] at this; simp at this; intro a; rw[a] at this; simp at this
+
+def f34: ℝ × ℝ × ℝ → ℝ × ℝ × ℝ × ℝ:= fun x => (x.1,x.2.1,x.2.2) => (x.1,(1+x.2.2*x.2.1)/x.1,x.2.1,x.2.2)
+
+
+
+
 
 def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
   toFun := fun ⟨(x,y,z,w),h⟩ => (x,z,w)
@@ -120,20 +127,10 @@ def chart1 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
         continuous_induced_dom; refine Continuous.star ?h.right.right.hf; refine
           Continuous.snd ?h.right.right.hf.hf; refine Continuous.snd ?h.right.right.hf.hf.hf; refine Continuous.snd ?h.right.right.hf.hf.hf.hf;exact
             continuous_induced_dom
-  continuousOn_invFun := by
+  continuousOn_invFun x := by
     simp
-    apply Continuous.continuousOn
-
-
-
-
-
-
-
-
-
-
-
+    intro hx
+    sorry
 
 
 
@@ -178,12 +175,11 @@ def chart3 : PartialHomeomorph SL2R (ℝ × ℝ × ℝ) where
   continuousOn_invFun := sorry
 
 
-### Charted space structure on the SL(2,ℝ )
+/--### Charted space structure on the SL(2,ℝ )
 
 In this section we construct a charted space structure on the SL(2,ℝ ) in a finite-dimensional
-real space `ℝ × ℝ × ℝ   `.
+real space `ℝ × ℝ × ℝ `.
 -/
-section ChartedSpace
 
 instance chartedSpace   :
     ChartedSpace  (ℝ × ℝ × ℝ) (SL2R) where
@@ -198,23 +194,22 @@ instance chartedSpace   :
 section SmoothManifold
   notation "𝓡" =>
     (modelWithCornersSelf ℝ (ℝ × ℝ × ℝ ) :
-      ModelWithCorners ℝ (ℝ × ℝ × ℝ) (ℝ × ℝ × ℝ))
+      ModelWithCorners ℝ (ℝ × ℝ × ℝ) (ℝ × ℝ × ℝ ))
 
-#check PartialHomeomorph.trans
 instance SL2R_smooth_manifold  :
     SmoothManifoldWithCorners (𝓡) (SL2R):= by
     apply smoothManifoldWithCorners_of_contDiffOn
     intro e e' he he'
     simp only[atlas] at he he'
     rcases he with (rfl | rfl) <;> rcases he' with (rfl | rfl)
-    · -- `e = left chart`, `e' = left chart`
+    · -- `e =  chart 1`, `e' = left chart 1`
       simp
       refine ContDiff.contDiffOn ?h.inl.inl.h
       sorry
-    . -- `e = left chart`, `e' = right chart`
+    . -- `e = left chart 1`, `e' = right chart 3`
       simp; sorry
-    · -- `e = right chart`, `e' = left chart`
+    · -- `e = right chart 3`, `e' = left chart 1`
       simp
       sorry
-    . -- `e = right chart`, `e' = right chart`
+    . -- `e = right chart 3`, `e' = right chart 3`
       simp; sorry
